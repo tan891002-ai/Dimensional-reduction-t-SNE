@@ -24,16 +24,33 @@ t-分布具有Heavy Tail特性，使距離較遠的樣本仍保有較大的權�
 
 ## 特色公式
 
+在 t-SNE 中，主要比較兩個相似度機率分布：
+
+- **P**：高維空間中的相似度分布，代表希望保留的原始資料局部關係
+- **Q**：低維空間中的相似度分布，代表目前低維資料所呈現的局部關係
+
+t-SNE 的目的就是透過持續調整低維資料的位置，使 **Q 盡可能接近 P**。
+
 ### 1、Perplexity
 
 $$perplexity(p_i)=2^{H(P_i)}$$
 
 $$H(P_i) = -\sum_{j\neq i}{} P_{j|i} log_2 P_{j|i} $$
 
+Perplexity 用來控制高維空間中的局部鄰域尺度，透過調整 $\sigma_i$，決定每個樣本應該以多大的範圍建立相似關係，進而影響高維相似度分布 **P** 的建立
+
 ### 2、KL Divergence 
 
 $$KL(P||Q)=\sum_{j\neq i}{}P_{ij} ln(\frac{P_{ij}}{Q_{ij}}) $$
 
+KL Divergence 用來衡量高維相似度分布P與低維相似度分布Q之間的差異
+
+透過最小化 KL Divergence，使低維空間的相似關係Q盡可能接近高維空間的目標關係P
+
 ### 3、KL Gradient
 
 $$\frac{\partial KL(P||Q)}{\partial y_i} = 4\sum_{j\neq i}{} (P_{ij}-Q_{ij}) (y_i-y_j)(1+||y_i-y_j||^{2})^{-1}$$
+
+KL Divergence 只能判斷目前P與Q差多少，但無法直接告訴低維樣本應該往哪裡移動
+
+因此透過 KL Gradient 計算 KL Divergence 對低維座標 $y_i$ 的梯度，決定樣本在低維空間中的調整方向，再持續更新位置，使Q逐漸接近P
