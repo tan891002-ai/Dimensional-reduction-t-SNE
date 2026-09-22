@@ -32,5 +32,5 @@ $$H(P_i) = -\sum_{j\neq i}{} P_{j|i} log_2 P_{j|i} $$
 
 ### 2、KL Divergence 
 
-$$KL(P||Q)=\sum_{j\neq i}{}P_{ij} ln(frac{P_{ij}}{Q_{ij}}) $$
+$$KL(P||Q)=\sum_{j\neq i}{}P_{ij} ln(\frac{P_{ij}}{Q_{ij}}) $$
 
