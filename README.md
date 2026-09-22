@@ -983,3 +983,116 @@ $$
 **Learning Rate：決定每次移動多少**
 
 **Y：實際被更新的低維座標**
+
+## t-SNE 演算法總結
+
+t-SNE 的核心目的，是將高維資料中的局部相似關係映射至低維空間，
+並透過持續調整低維樣本的位置，使低維空間盡可能保留高維資料的鄰近關係
+
+整體演算法可分為三個階段：
+
+### 1、建立目標高維空間 P
+
+首先計算高維樣本之間的距離，
+再透過 Gaussian 分布將距離轉換為相似權重，
+建立條件機率 $P_{j|i}$
+
+接著透過 Perplexity 控制局部鄰域尺度，
+調整每個樣本的 $\sigma_i$，
+使相似度分布符合設定的 Perplexity
+
+最後將 $P_{j|i}$ 與 $P_{i|j}$ 進行對稱化，
+建立高維空間的目標相似度分布：
+
+$$
+P
+$$
+
+### 2、建立目前低維空間 Q
+
+將高維資料初始化至低維空間，
+得到樣本目前的低維座標：
+
+$$
+Y
+$$
+
+再使用 t-分布計算低維空間中的樣本相似關係，
+建立目前的低維相似度分布：
+
+$$
+Q
+$$
+
+由於 t-分布具有 Heavy Tail，
+使距離較遠的樣本仍保有一定權重，
+讓不相似樣本在低維空間中能夠充分分離，
+降低 Crowding Problem
+
+### 3、比較並持續優化
+
+建立 P 與 Q 後，
+使用 KL Divergence 衡量兩者之間的差異：
+
+$$
+KL(P||Q)
+$$
+
+KL 越小，代表目前低維空間的相似關係越接近高維空間的目標關係
+
+但 KL Divergence 只能判斷目前差多少，
+因此透過 KL Gradient 計算低維座標的調整方向
+
+再利用 Learning Rate 決定每次座標移動的幅度，
+更新低維座標 $Y$
+
+更新後重新計算 Q，
+再重新計算 KL 與 Gradient，
+持續進行迭代
+
+整體流程為：
+
+$$
+P
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+Gradient
+\rightarrow
+Y
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+\cdots
+$$
+
+最終使低維空間中的相似度分布 $Q$
+逐漸接近高維空間的目標分布 $P$
+
+### 核心概念
+
+**Perplexity：決定高維空間的局部尺度，建立目標 P**
+
+**KL Divergence：比較目標 P 與目前 Q 的差異**
+
+**KL Gradient：根據差異決定低維座標 Y 的調整方向**
+
+因此 t-SNE 可以簡化理解為：
+
+$$
+\boxed{
+\text{建立目標 P}
+\rightarrow
+\text{建立目前 Q}
+\rightarrow
+\text{比較差異}
+\rightarrow
+\text{調整 Y}
+\rightarrow
+\text{重新計算 Q}
+}
+$$
