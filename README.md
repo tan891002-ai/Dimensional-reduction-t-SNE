@@ -17,3 +17,7 @@ t-分布具有Heavy Tail特性，使距離較遠的樣本仍保有較大的權�
 =>讓不相似樣本在低維空間中能夠充分分離，降低Crowding Problem
 
 ![t分布與常態分佈差異](t-disrtibution.png)
+
+## t-SNE流程
+
+![t-SNE演算法流程](process.png)
