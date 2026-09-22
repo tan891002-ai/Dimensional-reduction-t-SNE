@@ -34,3 +34,6 @@ $$H(P_i) = -\sum_{j\neq i}{} P_{j|i} log_2 P_{j|i} $$
 
 $$KL(P||Q)=\sum_{j\neq i}{}P_{ij} ln(\frac{P_{ij}}{Q_{ij}}) $$
 
+### 3、KL Gradient
+
+$$\frac{\partial KL(P||Q)}{\partial y_i} = 4\sum_{j\neq i}{} (P_{ij}-Q_{ij}) (y_i-y_j)(1+||y_i-y_j||^{2})^{-1}$$
