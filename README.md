@@ -26,8 +26,11 @@ t-分布具有Heavy Tail特性，使距離較遠的樣本仍保有較大的權�
 
 ### 1、Perplexity
 
-$$perplexity(p_i)=2^{H(2P_i)}$$
+$$perplexity(p_i)=2^{H(P_i)}$$
 
 $$H(P_i) = -\sum_{j\neq i}{} P_{j|i} log_2 P_{j|i} $$
 
+### 2、KL Divergence 
+
+$$KL(P||Q)=\sum_{j\neq i}{}P_{ij} ln(frac{P_{ij}}{Q_{ij}}) $$
 
