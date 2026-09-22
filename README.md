@@ -731,8 +731,9 @@ $$
 
 其中：
 
-- $P_{ij}$：高維空間中的目標相似度
-- $Q_{ij}$：低維空間中的目前相似度
+$P_{ij}$：高維空間中的目標相似度
+
+$Q_{ij}$：低維空間中的目前相似度
 
 KL Divergence 用來衡量目前低維空間的相似度分布 **Q**
 與高維空間目標分布 **P** 之間的差異
@@ -825,10 +826,8 @@ $$
 低維座標更新公式：
 
 $$
-y_i^{(t+1)}
-=
-y_i^{(t)}
--
+y_i^{(t+1)}=
+y_i^{(t)}-
 \eta
 \frac{\partial KL(P||Q)}
 {\partial y_i}
@@ -836,16 +835,18 @@ $$
 
 其中：
 
-- $y_i^{(t)}$：目前第 $t$ 次迭代的座標
-- $y_i^{(t+1)}$：更新後的座標
-- $\eta$：Learning Rate
-- $\frac{\partial KL(P||Q)}{\partial y_i}$：KL Divergence 對座標的 Gradient
+$y_i^{(t)}$：目前第 $t$ 次迭代的座標
+
+$y_i^{(t+1)}$：更新後的座標
+
+$\eta$：Learning Rate
+
+$\frac{\partial KL(P||Q)}{\partial y_i}$：KL Divergence 對座標的 Gradient
 
 Gradient 指向 KL Divergence 增加最快的方向，
 因此更新時使用負號：
 
 $$
--
 \frac{\partial KL(P||Q)}
 {\partial y_i}
 $$
