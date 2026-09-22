@@ -685,4 +685,310 @@ $$
 
 => **Q：低維空間的目前狀態**
 
+## 優化與迭代
 
+建立高維空間的目標相似度分布 **P**，
+以及低維空間目前的相似度分布 **Q** 後，
+
+接下來需要比較 **P 與 Q 的差異**，
+並根據差異調整低維空間中的樣本位置
+
+整個優化過程可以表示為：
+
+$$
+Y
+\rightarrow
+Q
+\rightarrow
+KL(P||Q)
+\rightarrow
+Gradient
+\rightarrow
+Y
+$$
+
+透過不斷重複此流程，
+使低維空間中的相似度分布 **Q** 逐漸接近高維空間的目標分布 **P**
+
+---
+
+### Step 1－評估 Q 與 P 的差距
+
+高維空間中的 **P** 代表希望低維空間保留的目標關係，
+而低維空間中的 **Q** 代表目前樣本位置所形成的相似關係
+
+因此需要比較兩者之間的差異
+
+使用 KL Divergence：
+
+$$
+KL(P||Q)
+=
+\sum_{i\neq j}
+P_{ij}
+\ln
+\left(
+\frac{P_{ij}}{Q_{ij}}
+\right)
+$$
+
+其中：
+
+- $P_{ij}$：高維空間中的目標相似度
+- $Q_{ij}$：低維空間中的目前相似度
+
+KL Divergence 用來衡量目前低維空間的相似度分布 **Q**
+與高維空間目標分布 **P** 之間的差異
+
+當：
+
+$$
+KL(P||Q)\downarrow
+$$
+
+代表 **Q 越接近 P**
+
+反之：
+
+$$
+KL(P||Q)\uparrow
+$$
+
+代表目前低維空間與高維目標之間的差異越大
+
+因此 t-SNE 的優化目標為：
+
+$$
+\min KL(P||Q)
+$$
+
+![KL Divergence](KLDivergence.png)
+
+=> KL Divergence 可以判斷目前低維空間與高維目標之間差多少
+
+=> 但 KL Divergence 本身只能提供差異大小，
+無法直接告訴樣本應該往哪個方向移動
+
+因此需要進一步計算 Gradient
+
+---
+
+### Step 2－更新座標
+
+當知道目前 $P$ 與 $Q$ 的差異後，
+需要調整低維空間中的樣本位置 $Y$
+
+#### Step 2-1－Gradient
+
+透過 KL Divergence 對低維座標 $y_i$ 進行微分：
+
+$$
+\frac{\partial KL(P||Q)}{\partial y_i}
+=
+4
+\sum_{j\neq i}
+(P_{ij}-Q_{ij})
+(y_i-y_j)
+(1+||y_i-y_j||^2)^{-1}
+$$
+
+Gradient 用來決定低維樣本座標的**調整方向與程度**
+
+其中：
+
+$$
+(P_{ij}-Q_{ij})
+$$
+
+表示高維目標關係與目前低維關係之間的差異
+
+$$
+(y_i-y_j)
+$$
+
+表示樣本 $i$ 與樣本 $j$ 在低維空間中的位置方向
+
+$$
+(1+||y_i-y_j||^2)^{-1}
+$$
+
+則來自低維空間使用的 t-分布
+
+因此 Gradient 會綜合目前的相似度差異與樣本位置，
+計算出 $y_i$ 應該如何調整
+
+![KL Gradient](KLGradient.png)
+
+=> KL Divergence 判斷目前差多少
+
+=> Gradient 決定低維座標應該往哪個方向調整
+
+---
+
+#### Step 2-2－實際更新
+
+得到 Gradient 後，
+使用 Learning Rate 控制每次座標移動的幅度
+
+低維座標更新公式：
+
+$$
+y_i^{(t+1)}
+=
+y_i^{(t)}
+-
+\eta
+\frac{\partial KL(P||Q)}
+{\partial y_i}
+$$
+
+其中：
+
+- $y_i^{(t)}$：目前第 $t$ 次迭代的座標
+- $y_i^{(t+1)}$：更新後的座標
+- $\eta$：Learning Rate
+- $\frac{\partial KL(P||Q)}{\partial y_i}$：KL Divergence 對座標的 Gradient
+
+Gradient 指向 KL Divergence 增加最快的方向，
+因此更新時使用負號：
+
+$$
+-
+\frac{\partial KL(P||Q)}
+{\partial y_i}
+$$
+
+使樣本往 KL Divergence 降低的方向移動
+
+Learning Rate 則決定每次移動的距離
+
+$$
+\eta\uparrow
+\Rightarrow
+\text{每次移動幅度增加}
+$$
+
+$$
+\eta\downarrow
+\Rightarrow
+\text{每次移動幅度減少}
+$$
+
+例如以樣本 `0_1` 為例，
+先取得其目前座標 $Y^{(0)}$，
+再根據 Gradient 計算更新方向，
+得到新的座標 $Y^{(1)}$
+
+![First Gradient Update of Sample 0_1](Move_One_Point.png)
+
+可以看到樣本 `0_1` 從原本的位置 $Y^{(0)}$
+沿著 Gradient 所決定的方向移動至新的位置 $Y^{(1)}$
+
+=> 每次更新只改變低維空間中的座標 $Y$
+
+=> 高維空間的目標分布 **P** 不會改變
+
+---
+
+### Step 3－重新計算 Q
+
+更新低維座標 $Y$ 後，
+低維空間中的樣本距離也會跟著改變
+
+因此需要重新計算低維相似度分布：
+
+$$
+Y
+\rightarrow
+Q
+$$
+
+新的 $Q$ 再與固定的 $P$ 進行比較：
+
+$$
+P
+\rightarrow
+KL(P||Q)
+$$
+
+如果 KL Divergence 仍然需要降低，
+則再次計算 Gradient 並更新 $Y$
+
+因此完整的迭代流程為：
+
+$$
+Y
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+Gradient
+\rightarrow
+Y
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+\cdots
+$$
+
+---
+
+### 如何跳出迴圈
+
+t-SNE 不會只更新一次座標，
+而是持續重複：
+
+$$
+Q
+\rightarrow
+KL
+\rightarrow
+Gradient
+\rightarrow
+Y
+$$
+
+直到低維空間的結果趨於穩定
+
+當 KL Divergence 不再明顯下降，
+代表目前的低維相似度分布 **Q** 已經逐漸接近目標分布 **P**，
+此時即可停止迭代
+
+因此整個 t-SNE 的優化流程可以整理為：
+
+$$
+\boxed{
+P
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+Gradient
+\rightarrow
+Y
+\rightarrow
+Q
+\rightarrow
+KL
+\rightarrow
+\cdots
+}
+$$
+
+其中：
+
+**P：高維空間的目標**
+
+**Q：低維空間的目前狀態**
+
+**KL：判斷目前差多少**
+
+**Gradient：決定往哪裡調整**
+
+**Learning Rate：決定每次移動多少**
+
+**Y：實際被更新的低維座標**
