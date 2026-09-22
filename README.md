@@ -21,3 +21,13 @@ t-分布具有Heavy Tail特性，使距離較遠的樣本仍保有較大的權�
 ## t-SNE流程
 
 ![t-SNE演算法流程](process.png)
+
+## 特色公式
+
+### 1、Perplexity
+
+$$perplexity(p_i)=2^{H(2P_i)}$$
+
+$$H(P_i) = -sum_P{a} P_{j|i} log_2 P_{j|i} $$
+
+
