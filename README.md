@@ -201,10 +201,11 @@ $$
 P_{j|i}=
 \frac{
 \exp(
-\frac{-||x_i-x_j||^2}{2\sigma_i^2)}
+\frac{-||x_i-x_j||^2}{2\sigma_i^2})
 }{
 \sum_{k\neq i}
-\exp(-||x_i-x_k||^2/2\sigma_i^2)
+\exp(
+\frac{-||x_i-x_k||^2}{2\sigma_i^2})
 }
 $$
 
